@@ -22,17 +22,25 @@
     <hr>
 
     <p>
-      Child($emit by mount):
+      <!-- 第一種方法:子元件用$emit 父元件用$on綁定同樣的方法去更新資料-->
+      Child1($emit by mount):
       <mount-component :parent-message="message"></mount-component>
     </p>
     <p>
+      <!-- 第二種方法:直接把父元件方法傳給子元件 -->
       Child2($emit by passing methods):
       <methods-component :parent-message="message" @parent-update="selfUpdate"></methods-component>
+    </p>
+    <p>
+      <!-- 第三種方法: 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件-->
+      Child3(Evene Bus):
+      <event-bus-component :parent-message="message"></event-bus-component>
     </p>
   </div>
 
 
   <script>
+    //第一種方法:子元件用$emit 父元件用$on綁定同樣的方法去更新資料
     Vue.component('mount-component', {
       template: '<span>\
                     {{ parentMessage }}\
@@ -53,7 +61,7 @@
         }
       }
     });
-    //另外一種綁定法
+    //第二種方法:直接把父元件方法傳給子元件
     var MethodsComponent = Vue.extend({
         template: '<span>\
                     {{ parentMessage }}\
@@ -74,12 +82,38 @@
           e.preventDefault();
         }
       }
-    })
+    });
+
+    //第三種eventBus(最容易)
+    var bus = new Vue();
+
+    var EventBusComponent = Vue.extend({
+        template: '<span>\
+                    {{ parentMessage }}\
+                    <input v-model="message">\
+                    <button @click="updateText">Update</button>\
+                  </span>',
+        props: {
+        parentMessage: String
+      },
+      data() {
+        return {
+          message: this.parentMessage
+        }
+      },
+      methods: {
+        updateText(e) {
+          bus.$emit('receive', this.message);
+        }
+      }
+    });
+
 
     new Vue({
       el: '#app',
       components:{
         MethodsComponent,
+        EventBusComponent,
       },
       data: {
         message: 'hello'
@@ -89,8 +123,16 @@
           this.message = val;
         }
       },
+      //第一種方法:父元件要先$on綁定方法
       mounted() {
         this.$on('update', this.selfUpdate);
+      },
+      //第三種event bus 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件
+      created() {
+        var that = this;
+        bus.$on('receive', function(newMsg) {
+          that.message = newMsg;
+        });
       }
     });
   </script>
