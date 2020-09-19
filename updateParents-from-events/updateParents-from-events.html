@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.3.4/vue.js"></script>
+  <title>update-from-events</title>
+  <style>
+    #app {
+      margin: 1em;
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app">
+    <p>
+      Parent: {{ message }} <input v-model="message">
+    </p>
+    <hr>
+
+    <p>
+      Child($emit by mount):
+      <mount-component :parent-message="message"></mount-component>
+    </p>
+    <p>
+      Child2($emit by passing methods):
+      <methods-component @parent-update="selfUpdate"></methods-component>
+    </p>
+  </div>
+
+
+  <script>
+    Vue.component('mount-component', {
+      template: '<span>\
+                    {{ parentMessage }}\
+                    <input v-model="message">\
+                    <button @click="updateText">Update</button>\
+                  </span>',
+      props: {
+        parentMessage: String
+      },
+      data() {
+        return {
+          message: this.parentMessage
+        }
+      },
+      methods: {
+        updateText() {
+          this.$parent.$emit('update', this.message);
+        }
+      }
+    });
+    //另外一種綁定法
+    var MethodsComponent = Vue.extend({
+        template: '<span>\
+                    {{ parentMessage }}\
+                    <input v-model="message">\
+                    <button @click="updateText">Update</button>\
+                  </span>',
+        props: {
+        parentMessage: String
+      },
+      data() {
+        return {
+          message: this.parentMessage
+        }
+      },
+      methods: {
+        updateText(e) {
+          this.$emit('parent-update', this.message);
+          e.preventDefault();
+        }
+      }
+    })
+
+    new Vue({
+      el: '#app',
+      components:{
+        MethodsComponent,
+      },
+      data: {
+        message: 'hello'
+      },
+      methods: {
+        selfUpdate(val) {
+          this.message = val;
+        }
+      },
+      mounted() {
+        this.$on('update', this.selfUpdate);
+      }
+    });
+  </script>
+
+</body>
+
+</html>
