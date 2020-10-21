@@ -30,7 +30,7 @@
       <!-- 第二種方法:直接把父元件方法傳給子元件 -->
       <!-- 透過v-on綁定父元件事件 -->
 	  <!--內部(子)元件需透過$emit通知外部(父)元件的方法去更新-->
-	  <!--綁定方法 @{要$emit的內部(子)元件名稱}="{外部(父)元件方法名稱}"-->
+	  <!--綁定方法 @{要$emit的內部(子)元件事件名稱}="{外部(父)元件方法名稱}"-->
       Child2($emit by passing parent methods):
       <methods-component :parent-message="message" @second-update-parent="selfUpdate"></methods-component>
     </p>
