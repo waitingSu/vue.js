@@ -30,7 +30,7 @@
       <!-- 第二種方法:直接把父元件方法傳給子元件 -->
       <!-- 透過v-on綁定父元件事件 -->
       Child2($emit by passing parent methods):
-      <methods-component :parent-message="message" @parent-update="selfUpdate"></methods-component>
+      <methods-component :parent-message="message" @update="selfUpdate"></methods-component>
     </p>
     <p>
       <!-- 第三種方法: 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件-->
@@ -41,9 +41,10 @@
       <!-- 第四種方法: 2.3之後提供的sync方法 是第二種的語法糖-->
       <!-- 將原本要用@parent-update="selfUpdate"傳入父元件的update事件-->
       <!-- 直接用sync修飾詞去更新對象prop child則使用update:{你bind的propName}去做$emit事件監聽-->
+      <!-- 真正的code為 <sync-component :parent-message="message" @update:parent-message='message'></sync-component>-->
       Child4(sync):
        <!-- 為了避免混淆v-bind:{propName}改為childmsg-->
-      <sync-component :parent-message="message" v-bind:childmsg.sync="message"></sync-component>
+      <sync-component v-bind:parent-message.sync="message"></sync-component>
     </p>
   </div>
 
@@ -90,7 +91,7 @@
         updateText(e) {
           //注意: 這裡$emit雖然可以使用camelCase和kebab-case，但是由於dom的命名上是使用kebab-case且不會轉換回camelCase
           //而事件綁定必須精確命名，因此在事件的命名上推薦kebab-case，以避免名稱轉換上混淆的問題
-          this.$emit('parent-update', this.message);
+          this.$emit('update', this.message);
           e.preventDefault();
         }
       }
@@ -138,7 +139,7 @@
       methods: {
         updateText(e) {
           //sync修飾詞可以把{propName}.sync轉成update:{propName}
-          this.$emit('update:childmsg', this.message);
+          this.$emit('update:parentMessage', this.message);
           e.preventDefault();
         }
       }
@@ -156,6 +157,7 @@
         message: 'hello',
       },
       methods: {
+        //第二種方法:父元件方法
         selfUpdate(val) {
           this.message = val;
         }
