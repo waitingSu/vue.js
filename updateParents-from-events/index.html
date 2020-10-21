@@ -43,7 +43,8 @@
       <!-- 第四種方法: 2.3之後提供的sync方法 是第二種的語法糖-->
       <!-- 將原本要用@second-update-parent="selfUpdate"傳入父元件的update事件-->
       <!-- 直接用sync修飾詞去更新對象prop child則使用update:{你bind的propName}去做$emit事件監聽-->
-      <!-- 真正的code為 <sync-component :fourth-parent-message="message" @update:fourth-parent-message='message'></sync-component>-->
+      <!-- 真正的code為 <sync-component :fourth-parent-message="message" @update:fourth-parent-message='message = $event'></sync-component>-->
+	  <!-- or <sync-component :fourth-parent-message="message" @update:fourth-parent-message='val => message = val'></sync-component>-->
       Child4(sync):
       <sync-component v-bind:fourth-parent-message.sync="message"></sync-component>
     </p>
