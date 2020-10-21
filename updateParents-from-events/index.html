@@ -29,8 +29,10 @@
     <p>
       <!-- 第二種方法:直接把父元件方法傳給子元件 -->
       <!-- 透過v-on綁定父元件事件 -->
+	  <!--內部(子)元件需透過$emit通知外部(父)元件的方法去更新-->
+	  <!--綁定方法 @{要$emit的內部(子)元件名稱}="{外部(父)元件方法名稱}"-->
       Child2($emit by passing parent methods):
-      <methods-component :parent-message="message" @update="selfUpdate"></methods-component>
+      <methods-component :parent-message="message" @second-update-parent="selfUpdate"></methods-component>
     </p>
     <p>
       <!-- 第三種方法: 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件-->
@@ -39,12 +41,11 @@
     </p>
     <p>
       <!-- 第四種方法: 2.3之後提供的sync方法 是第二種的語法糖-->
-      <!-- 將原本要用@parent-update="selfUpdate"傳入父元件的update事件-->
+      <!-- 將原本要用@second-update-parent="selfUpdate"傳入父元件的update事件-->
       <!-- 直接用sync修飾詞去更新對象prop child則使用update:{你bind的propName}去做$emit事件監聽-->
-      <!-- 真正的code為 <sync-component :parent-message="message" @update:parent-message='message'></sync-component>-->
+      <!-- 真正的code為 <sync-component :fourth-parent-message="message" @update:fourth-parent-message='message'></sync-component>-->
       Child4(sync):
-       <!-- 為了避免混淆v-bind:{propName}改為childmsg-->
-      <sync-component v-bind:parent-message.sync="message"></sync-component>
+      <sync-component v-bind:fourth-parent-message.sync="message"></sync-component>
     </p>
   </div>
 
@@ -68,7 +69,7 @@
       methods: {
         updateText() {
           //第一種方法必須個別在父/子元件都$on/$emit才能做到two way binding
-          this.$parent.$emit('update', this.message);
+          this.$parent.$emit('first-update-parent', this.message);
         }
       }
     });
@@ -91,7 +92,7 @@
         updateText(e) {
           //注意: 這裡$emit雖然可以使用camelCase和kebab-case，但是由於dom的命名上是使用kebab-case且不會轉換回camelCase
           //而事件綁定必須精確命名，因此在事件的命名上推薦kebab-case，以避免名稱轉換上混淆的問題
-          this.$emit('update', this.message);
+          this.$emit('second-update-parent', this.message);
           e.preventDefault();
         }
       }
@@ -116,7 +117,7 @@
       },
       methods: {
         updateText(e) {
-          bus.$emit('receive', this.message);
+          bus.$emit('third-update-parent', this.message);
         }
       }
     });
@@ -124,22 +125,23 @@
     //第四種 sync 為第二種的語法糖
     var SyncComponent = Vue.extend({
       template: '<span>\
-                    {{ parentMessage }}\
+                    {{ fourthParentMessage }}\
                     <input v-model="message">\
                     <button @click="updateText">Update</button>\
                   </span>',
       props: {
-        parentMessage: String
+        fourthParentMessage: String
       },
       data() {
         return {
-          message: this.parentMessage
+          message: this.fourthParentMessage
         }
       },
       methods: {
         updateText(e) {
           //sync修飾詞可以把{propName}.sync轉成update:{propName}
-          this.$emit('update:parentMessage', this.message);
+		  //這裡要注意名稱的格式
+          this.$emit('update:fourthParentMessage', this.message);
           e.preventDefault();
         }
       }
@@ -164,12 +166,12 @@
       },
       //第一種方法:父元件要先$on綁定方法
       mounted() {
-        this.$on('update', this.selfUpdate);
+        this.$on('first-update-parent', this.selfUpdate);
       },
       //第三種event bus 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件
       created() {
         var that = this;
-        bus.$on('receive', function (newMsg) {
+        bus.$on('third-update-parent', function (newMsg) {
           that.message = newMsg;
         });
       }
