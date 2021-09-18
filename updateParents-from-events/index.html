@@ -22,28 +22,40 @@
     <hr>
 
     <p>
-      <!-- 第一種方法:子元件用$emit 父元件用$on綁定同樣的方法去更新資料-->
-      Child1($emit by mount):
+      第一種方法:子元件用$emit 父元件用$on綁定同樣的方法去更新資料<br>
+      :parent-message="message"=>v-bind:parent-message="message"<br>
+      其中parent-message是子元件內層所引用的prop(遵循Camel Case)<br>
+      message則是外層父元件所用的data<br>
+      在這個方法下父元件需要再method綁定監聽方法ex:this.$on('first-update-parent', this.selfUpdate);<br>
+      子元件則要用$emit this.$parent.$emit('first-update-parent', this.message);<br>
+      才能實現雙向綁定(注意綁定事件要採用kebab-case才不會混淆)<br>
+      Child1($emit by mount):<br>
       <mount-component :parent-message="message"></mount-component>
     </p>
     <p>
-      <!-- 第二種方法:直接把父元件方法傳給子元件 -->
-      <!-- 透過v-on綁定父元件事件 -->
-	  <!--內部(子)元件需透過$emit通知外部(父)元件的方法去更新-->
-	  <!--綁定方法 @{要$emit的內部(子)元件事件名稱}="{外部(父)元件方法名稱}"-->
-      Child2($emit by passing parent methods):
+      第二種方法:直接把父元件方法傳給子元件<br>
+      透過v-on綁定父元件事件如同樣綁定method selfUpdate<br>
+	    內部(子)元件需透過$emit通知外部(父)元件的方法去更新<br>
+	    綁定方法 @{要$emit的內部(子)元件事件名稱}="{外部(父)元件方法名稱}"<br>
+      Child2($emit by passing parent methods):<br>
       <methods-component :parent-message="message" @second-update-parent="selfUpdate"></methods-component>
     </p>
     <p>
-      <!-- 第三種方法: 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件-->
-      Child3(Evene Bus):
+      第三種方法: 類似第一種方法 但是透過另一個vue實體來監聽更新所有綁定方法的事件<br>
+      在這種方法下 只需要父元件data傳入子元件prop(:parent-message="message")<br>
+      子元件對父元件資料的更新則透過第三方的vue去更新<br>
+      ex:<br>
+      bus = new vue();<br>
+      bus.$emit('third-update-parent', this.message);<br>
+      Child3(Evene Bus):<br>
       <event-bus-component :parent-message="message"></event-bus-component>
     </p>
     <p>
-      <!-- 第四種方法: 2.3之後提供的sync方法 是第二種的語法糖-->
-      <!-- 將原本要用@second-update-parent="selfUpdate"傳入父元件的update事件-->
-      <!-- 直接用sync修飾詞去更新對象prop child則使用update:{你bind的propName}去做$emit事件監聽-->
-      <!-- 真正的code為 <sync-component :fourth-parent-message="message" @update:fourth-parent-message='message = $event'></sync-component>-->
+      第四種方法: 2.3之後提供的sync方法 是第二種的語法糖v-bind:fourth-parent-message.sync="message"<br>
+      將原本要用@second-update-parent="selfUpdate"傳入父元件的update事件<br>
+      直接用sync修飾詞去更新對象prop child則使用update:{你bind的propName}去做$emit事件監聽<br>
+      真正的code為 :fourth-parent-message='message' @update:fourth-parent-message='message = $event'<br>
+      (vue 3.0之後已經捨棄此寫法)<br>
 	  <!-- or <sync-component :fourth-parent-message="message" @update:fourth-parent-message='val => message = val'></sync-component>-->
       Child4(sync):
       <sync-component v-bind:fourth-parent-message.sync="message"></sync-component>
