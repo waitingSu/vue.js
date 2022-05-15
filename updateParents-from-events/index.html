@@ -82,6 +82,7 @@
       methods: {
         updateText() {
           //第一種方法必須個別在父/子元件都$on/$emit才能做到two way binding
+          //this.$parent.$emit('first-update-parent', this.message);
           this.$parent.$emit('first-update-parent', this.message);
         }
       }
